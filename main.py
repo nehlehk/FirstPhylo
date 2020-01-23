@@ -1,9 +1,11 @@
+#======================================================================================================================
 '''
 Jan 2020
-A Bayesian phylogenetics inference program
-This program is my first practice to understand the concept of phylogenetic reconstruction by using Bayesian
-Authors: Nehleh
+Bayesian phylogenetics inference code
+This code is my first practice to understand the concept of phylogenetic reconstruction by using Bayesian.
+Authors: Nehleh Kargarfard
 '''
+#======================================================================================================================
 # import libraries
 import sys
 import math
@@ -19,13 +21,7 @@ import seaborn as sns
 
 
 #=======================================================================================================================
-#(A) calculate Maximum Likelihood analytically :
-
 # The first parameter (i.e theta) contains model parameters i.e: in JC69  it just contains edge length v.
-# In HKY it contains five parameters the first one is v= edge length, the second one is k = transition-transversion ratio.
-# The third last items are pi_A , pi_C and pi_G respectively.
-# In GTR: the first one is v= edge length, the third last items are similar to HKY and the four remaining itemes are exchangeability
-# parameters
 #=======================================================================================================================
 def log_likelihood(theta, data = None, model = 'JC69'):
 
@@ -46,11 +42,7 @@ def log_likelihood(theta, data = None, model = 'JC69'):
         # print("v = {} , y = {}  , negLL = {} ".format(v, y , negLL))  # for tracing
         return y
         #=====================   for more than two sequences =========================
-        # v = theta
-        # L = 0.25 * ((0.25 + 0.75 * math.exp(-4 * v[0] / 3)) * (0.25 + 0.75 * math.exp(-4 * v[1] / 3)) * (0.25 - 0.25 * math.exp(-4 * v[2] / 3))
-        #  * (0.25 - 0.25 * math.exp(-4 * v[3] / 3)) * (0.25 + 0.75 * math.exp(-4 * v[4] / 3)))
-        # negLL = -L
-        # return negLL
+
         #=============================================================================
 
     elif model == 'HKY':
@@ -61,7 +53,7 @@ def log_likelihood(theta, data = None, model = 'JC69'):
 #=======================================================================================================================
 # Using scipy.optimize.minimize to find MLE
 #=======================================================================================================================
-def Max_LL():
+def max_like():
     initial_guess = 0.2
     result = spo.minimize(log_likelihood , initial_guess ,method='nelder-mead') #, options={'disp' : True}
     print("Result by using scipy:")
@@ -71,7 +63,7 @@ def Max_LL():
 #=======================================================================================================================
 # Using simple loop to find MLE
 #=======================================================================================================================
-def Max_LL2():
+def max_like_manual():
     v = np.arange( 0.01, 1, 0.001)
     ll_array = []
     for i in v:
@@ -87,15 +79,15 @@ def Max_LL2():
 # Plot Maximum Likelihood Estimation
 #=======================================================================================================================
 def plot_MLE():
-    d = np.arange(0.0001, Max_LL() + 0.2, 0.005)
+    d = np.arange(0.0001, max_like() + 0.2, 0.005)
     ll_array = []
     for i in d:
         y_plot = -log_likelihood([i])
         ll_array.append(y_plot)
 
     plt.plot(d, ll_array, label='fitted model')
-    plt.axvline(Max_LL(), color='r', ls='-.')
-    plt.title(str(float(Max_LL()))+"  is the maximum likelihood estimate (MLE) of v")
+    plt.axvline(max_like(), color='r', ls='-.')
+    plt.title(str(float(max_like()))+"  is the maximum likelihood estimate (MLE) of v")
     plt.ylabel('log(L)')
     plt.xlabel('v')
     #plt.legend(loc='lower right')
@@ -109,6 +101,7 @@ def transition_model(theta):
     else:
         return propsal
 #=======================================================================================================================
+#Define prior
 def prior(theta):
         return 1
 #=======================================================================================================================
@@ -198,7 +191,7 @@ temp=int(0.25*accepted.shape[0])
 print("Mean_whole_theta after burn-in: ",np.mean(all_theta[temp:]))
 print("SD_whole_theta after burn-in: ",np.std(all_theta[temp:]))
 
-# We consider the initial 25% of the values of v to be "burn-in", so we drop them.
+# consider the initial 25% of the values of v to be "burn-in", so we drop them.
 show=int(0.25*final_log_acc.shape[0])
 
 fig = plt.figure(figsize=(10,10))
@@ -223,11 +216,6 @@ ax.grid("off")
 ax = sns.distplot(accepted,bins=300,hist= True)
 
 plt.show()
-
-
-print("This my first change after uploading this file on github")
-
-
 
 
 
