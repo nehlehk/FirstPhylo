@@ -34,7 +34,7 @@ def log_likelihood(theta, data = None, model = 'JC69'):
 
     if model == 'JC69':
         # ===================   for two sequences   =======================
-        v = theta[0]
+        v = theta
         # p0 = 0.25 + 0.75 * math.exp(-4 * v / 3)
         # p1 = 0.25 - 0.25 * math.exp(-4 * v / 3)
         p0 =  0.25 + 0.75 * math.exp(-4 * v / 3)
@@ -98,16 +98,20 @@ def plot_MLE():
 #The tranistion model defines how to move from current to new
 def transition_model(theta,type,width):
     if type == 'sw_norm':
-        proposal = np.random.normal(theta[0], width)
+        proposal = np.random.normal(theta, width)
         if (proposal < 0):
-            proposal =  -theta[0] - proposal  # reflection in normal dist --- the excess is reflected back into the interval
+            proposal =  -theta - proposal  # reflection in normal dist --- the excess is reflected back into the interval
     elif type == 'sw_uni':
-        proposal = np.random.uniform(theta[0] - width/2 , theta[0] + width/2)
+        proposal = np.random.uniform(theta - width/2 , theta + width/2)
         if (proposal < 0):
             proposal = - proposal  # reflection in uniform dist
+    elif type == 'pscale':
+        c = np.exp(width * (np.random.uniform(0,1) -1)/2 )
+        proposal = theta * c
     # elif type == 'sw-mulnorm':
     #     proposal = np.random.multivariate_normal()
 
+    # print(proposal)
     return proposal
 
 
@@ -162,14 +166,16 @@ def metropolis_hastings(likelihood_computer,prior, transition_model, param_init,
 
     return np.array(final_log_acc) , np.array(final_log_rej) , np.array(accepted) , np.array(rejected) , np.array(all_theta)
 # ======================================================================================================================
-iterations = 500000
+iterations = 1000000
+
+# transition_model(0.5,'pscale',0.1)
 
 final_log_acc,final_log_rej,accepted,rejected,all_theta  =  \
-    metropolis_hastings(log_likelihood,prior,transition_model,[0.5,'normal',0.1],iterations,[90,948],acceptance)
+    metropolis_hastings(log_likelihood,prior,transition_model,[0.5,'sw_uni',0.15],iterations,[90,948],acceptance)
 
 
 
-print("P_jump = ", round(accepted.shape[0] / iterations  * 100 , 2) , '%' )
+print("P_jump = ", round(accepted.shape[0]/iterations * 100 , 2) , '%' )
 
 # print("Rejected rate",int(rejected.shape)/iterations)
 
@@ -180,8 +186,8 @@ print("Final_rej",final_log_rej.shape)
 
 fig = plt.figure(figsize=(10,10))
 ax = fig.add_subplot(2,1,1)
-ax.plot( rejected[0:500,0], 'rx', label='Rejected',alpha=0.9)
-ax.plot( accepted[0:500,0], 'b.', label='Accepted',alpha=0.9)
+ax.plot( rejected[:500], 'rx', label='Rejected',alpha=0.9)
+ax.plot( accepted[:500], 'b.', label='Accepted',alpha=0.9)
 ax.set_xlabel("Iteration")
 ax.set_ylabel("v")
 ax.set_title("Figure 2: MCMC sampling for v with Metropolis-Hastings. First 500 samples are shown.")
@@ -190,8 +196,8 @@ ax.legend()
 
 ax2 = fig.add_subplot(2,1,2)
 to_show=final_log_acc.shape[0]
-ax2.plot( final_log_rej[:to_show,0], 'rx', label='Rejected',alpha=0.5)
-ax2.plot( final_log_acc[:to_show,0], 'b.', label='Accepted',alpha=0.5)
+ax2.plot( final_log_rej[:to_show], 'rx', label='Rejected',alpha=0.5)
+ax2.plot( final_log_acc[:to_show], 'b.', label='Accepted',alpha=0.5)
 ax2.set_xlabel("Iteration")
 ax2.set_ylabel("v")
 ax2.set_title("Figure 3: MCMC sampling for v with Metropolis-Hastings. All samples are shown.")
@@ -210,7 +216,7 @@ show=int(0.25*final_log_acc.shape[0])
 
 fig = plt.figure(figsize=(10,10))
 ax = fig.add_subplot(1,1,1)
-ax.plot(final_log_acc[show:,0])
+ax.plot(final_log_acc[show:])
 ax.set_title("Figure 4: Trace for v")
 ax.set_ylabel("v")
 ax.set_xlabel("Iteration")
@@ -231,4 +237,3 @@ ax = sns.distplot(accepted,bins=300,hist= True)
 
 plt.show()
 
-# transition_model(0.5,'sw_uni',0.1)
