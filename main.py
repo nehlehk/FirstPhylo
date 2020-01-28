@@ -35,8 +35,10 @@ def log_likelihood(theta, data = None, model = 'JC69'):
     if model == 'JC69':
         # ===================   for two sequences   =======================
         v = theta[0]
-        p0 = 0.25 + 0.75 * math.exp(-4 * v / 3)
-        p1 = 0.25 - 0.25 * math.exp(-4 * v / 3)
+        # p0 = 0.25 + 0.75 * math.exp(-4 * v / 3)
+        # p1 = 0.25 - 0.25 * math.exp(-4 * v / 3)
+        p0 =  0.25 + 0.75 * math.exp(-4 * v / 3)
+        p1 =  0.75 - 0.75 * math.exp(-4 * v / 3)
         y = (n-x)* np.log(p0) + x * np.log(p1)
         # negLL = -y
         # print("v = {} , y = {}  , negLL = {} ".format(v, y , negLL))  # for tracing
@@ -94,12 +96,22 @@ def plot_MLE():
     plt.show()
 #=======================================================================================================================
 #The tranistion model defines how to move from current to new
-def transition_model(theta):
-    propsal = np.random.normal(theta[0], 0.01 ,(1,))
-    if ((propsal) < 0):
-        return -theta[0]-propsal #reflection
-    else:
-        return propsal
+def transition_model(theta,type,width):
+    if type == 'sw_norm':
+        proposal = np.random.normal(theta[0], width)
+        if (proposal < 0):
+            proposal =  -theta[0] - proposal  # reflection in normal dist --- the excess is reflected back into the interval
+    elif type == 'sw_uni':
+        proposal = np.random.uniform(theta[0] - width/2 , theta[0] + width/2)
+        if (proposal < 0):
+            proposal = - proposal  # reflection in uniform dist
+    # elif type == 'sw-mulnorm':
+    #     proposal = np.random.multivariate_normal()
+
+    return proposal
+
+
+
 #=======================================================================================================================
 #Define prior
 def prior(theta):
@@ -124,14 +136,16 @@ def metropolis_hastings(likelihood_computer,prior, transition_model, param_init,
     # acceptance_rule(current_pos, new_pos): decides whether to accept or reject the new sample
 
 
-    theta = param_init
+    theta = param_init[0]
+    proposal_type = param_init[1]
+    proposal_width = param_init[2]
     accepted = []
     rejected = []
     final_log_acc = []
     final_log_rej = []
     all_theta = []
     for i in range(iterations):
-        new_theta = transition_model(theta)
+        new_theta = transition_model(theta,proposal_type,proposal_width)
         all_theta.append(new_theta)
         lik_theta = likelihood_computer(theta,data)
         lik_new_theta = likelihood_computer(new_theta,data)
@@ -149,15 +163,16 @@ def metropolis_hastings(likelihood_computer,prior, transition_model, param_init,
 
     return np.array(final_log_acc) , np.array(final_log_rej) , np.array(accepted) , np.array(rejected) , np.array(all_theta)
 # ======================================================================================================================
+iterations = 500000
+
 final_log_acc,final_log_rej,accepted,rejected,all_theta  =  \
-    metropolis_hastings(log_likelihood,prior,transition_model,[0.2],1000000,[90,948],acceptance)
+    metropolis_hastings(log_likelihood,prior,transition_model,[0.5,'normal',0.1],iterations,[90,948],acceptance)
 
 
 
+print("P_jump = ", round(accepted.shape[0] / iterations  * 100 , 2) , '%' )
 
-print("Accepeted",accepted.shape)
-
-print("Rejected",rejected.shape)
+# print("Rejected rate",int(rejected.shape)/iterations)
 
 
 
@@ -217,9 +232,4 @@ ax = sns.distplot(accepted,bins=300,hist= True)
 
 plt.show()
 
-
-
-
-
-
-
+# transition_model(0.5,'sw_uni',0.1)
