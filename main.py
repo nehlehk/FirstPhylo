@@ -146,7 +146,6 @@ def metropolis_hastings(likelihood_computer,prior, transition_model, param_init,
     all_theta = []
     for i in range(iterations):
         new_theta = transition_model(theta,proposal_type,proposal_width)
-        all_theta.append(new_theta)
         lik_theta = likelihood_computer(theta,data)
         lik_new_theta = likelihood_computer(new_theta,data)
         if (acceptance(lik_theta+np.log(prior(theta)), lik_new_theta+np.log(prior(new_theta)))):
@@ -158,7 +157,7 @@ def metropolis_hastings(likelihood_computer,prior, transition_model, param_init,
             rejected.append(new_theta)
             if not(i % 100):
                 final_log_rej.append(new_theta)
-
+        all_theta.append(theta)
 
 
     return np.array(final_log_acc) , np.array(final_log_rej) , np.array(accepted) , np.array(rejected) , np.array(all_theta)
@@ -202,7 +201,7 @@ ax2.legend(loc="best")
 fig.tight_layout()
 
 
-temp=int(0.25*accepted.shape[0])
+temp=int(0.25*all_theta.shape[0])
 print("Mean_whole_theta after burn-in: ",np.mean(all_theta[temp:]))
 print("SD_whole_theta after burn-in: ",np.std(all_theta[temp:]))
 
