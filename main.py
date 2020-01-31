@@ -108,14 +108,10 @@ def transition_model(theta,type,width):
     elif type == 'pscale':
         c = np.exp(width * (np.random.uniform(0,1) -1)/2 )
         proposal = theta * c
-    # elif type == 'sw-mulnorm':
-    #     proposal = np.random.multivariate_normal()
+
 
     # print(proposal)
     return proposal
-
-
-
 #=======================================================================================================================
 #Define prior
 def prior(theta):
