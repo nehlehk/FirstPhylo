@@ -2,6 +2,8 @@
 import numpy as np
 import scipy.optimize as spo
 import pprint
+import matplotlib.pyplot as plt
+import numpy.linalg as la
 
 #=======================================================================================================================
 def f(*param):
@@ -87,7 +89,6 @@ def get_base_count(dna):
     return counts
 #===================================================================================================================
 def get_base_frequencies(dna):
-    # base_count = {base: dna.count(base)   for base in 'ACGT'}
     base_freq =  {base: dna.count(base)/float(len(dna))
              for base in 'ACGT'}
 
@@ -133,32 +134,99 @@ def transition_matrix_computation(seq1,seq2):
     return tran_matrix
 
 #===================================================================================================================
-def transition_matrix_computation2(dna_list):
+def ratio_matrix_computation(dna_list):
     i = 0
-    n = len(dna_list)
-    tran_matrix = {base :{base2 :0 for base2 in 'ACGT'} for base in 'ACGT'}
+    seq_count = len(dna_list)
+    seq_length = len(dna_list[0])
+    ratio_matrix = {base :{base2 :0 for base2 in 'ACGT'} for base in 'ACGT'}
 
-    # while (i < n-1 ):
+    # while (i < seq_count -1 ):
     dna1 = dna_list[i]
     dna2 = dna_list[i+1]
     for index, base1 in enumerate(dna1):
         base2 = dna2[index]
-        tran_matrix[base1][base2] += 1
+        ratio_matrix[base1][base2] += 1  #give count
+
+    # ============================================================
+    #dirty code :(
+    for base1 in 'ACGT':
+        for base2 in 'ACGT':
+            ratio_matrix[base1][base2] = ratio_matrix[base1][base2] / seq_length # give ratio
 
         # i += 1
 
-    return tran_matrix
+    return ratio_matrix
 #===================================================================================================================
 def avg_base_frequencies(alignment):
     n = len(alignment)
-    # sum_bf = [0,0,0,0]
+    a = c = g = t = 0
     for align in alignment:
        sum_bf =  get_base_frequencies(align)
+       a += sum_bf['A']
+       c += sum_bf['C']
+       g += sum_bf['G']
+       t += sum_bf['T']
 
-    return sum_bf
+    return a/float(n) , c/float(n) , g/float(n) , t/float(n)
 #===================================================================================================================
-fr = avg_base_frequencies(['ACCT','ACGT'])
-print(fr['A']/2)
+def GTR_matrix(alignment):
+    n = len(alignment[0])
+    mu = 0
+    a = b = c = d = e = f = 0
+    ratio_matrix =ratio_matrix_computation(alignment)
+    a = ratio_matrix['A']['G'] + ratio_matrix['G']['A']
+    b = ratio_matrix['A']['C'] + ratio_matrix['C']['A']
+    c = ratio_matrix['A']['T'] + ratio_matrix['T']['A']
+    d = ratio_matrix['G']['C'] + ratio_matrix['C']['G']
+    e = ratio_matrix['G']['T'] + ratio_matrix['T']['G']
+    f = ratio_matrix['C']['T'] + ratio_matrix['T']['C']
+    pi_a, pi_c, pi_g , pi_t = avg_base_frequencies(alignment)
+    mu = 1 / (2 * (a*pi_a*pi_c) + (b*pi_a*pi_g) + (c*pi_a*pi_t) + (d*pi_c*pi_g) + (e*pi_c*pi_t) + (pi_g*pi_t))
+
+    Q = np.zeros((4, 4))
+
+
+#===================================================================================================================
+def  transition_probability_matrix(t,beta):
+    q = np.zeros((4, 4))
+    p = np.zeros((4, 4))
+    q[:][:] = beta
+    q[0][0] = q[1][1] = q[2][2] = q[3][3] = -3*beta
+    eigval, eigvec = la.eig(q)
+    eigvec_inv = la.inv(eigvec)
+    p = np.dot(eigvec,np.dot(np.diag(np.exp(eigval * t)), eigvec_inv))
+    return p
+#===================================================================================================================
+v = np.arange( 0 , 1.1, 0.01)
+y1 = []
+y2 = []
+d = []
+for i in v:
+    q = transition_probability_matrix(i,i)
+    pprint.pprint(q)
+    y1.append(q[0][1])
+    y2.append(q[0][0])
+    d.append(i*i)
+
+
+plt.plot(d, y1, label='P(CT)')
+plt.plot(d, y2, label='P(CC)')
+plt.ylabel('probablity')
+plt.xlabel('v')
+plt.legend(loc='lower right')
+plt.show()
+#
+
+
+
+
+# alignment = ['AAAAAGGCAA','GGGCTCTTAA']
+# r = ratio_matrix_computation(alignment)
+# n = len(alignment[0])
+# pprint.pprint(r)
+# print(r['A']['G'])
+# print(avg_base_frequencies(['ACCT','ACGT']))
+
 # tran_matrix2 = {base :{base2 :0 for base2 in 'ACGT'} for base in 'ACGT'}
 #
 # tran_matrix2['A']['A'] = tran_matrix2['A']['A'] + 1
