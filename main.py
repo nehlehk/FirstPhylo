@@ -10,18 +10,21 @@ Authors: Nehleh Kargarfard
 import sys
 import math
 from builtins import print
+from symbol import import_as_name
+
 import numpy as np
 import scipy.optimize as spo
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy.linalg as la
 import pprint
-# from Bio import SeqIO
+import dendropy
 
 
 #=======================================================================================================================
 def transition_probability_matrix_GTR(alignment,br_len ,a = 1 , b = 1 , c = 1 , d = 1 , e = 1 , f = 1):
-    n = len(alignment[0])
+    n = alignment.sequence_size
+    # n = len(alignment[0])
     mu = 0
 
     freq = np.zeros((4, 4))
@@ -30,6 +33,7 @@ def transition_probability_matrix_GTR(alignment,br_len ,a = 1 , b = 1 , c = 1 , 
     sqrtPiInv =  np.zeros((4, 4))
     exchang = np.zeros((4, 4))
     s = np.zeros((4, 4))
+    fun = np.zeros(n)
 
     # pi = avg_base_frequencies(alignment)
     pi = [0.25,0.25,0.25,0.25]
@@ -64,19 +68,22 @@ def transition_probability_matrix_GTR(alignment,br_len ,a = 1 , b = 1 , c = 1 , 
 
     p = np.dot(left, np.dot(np.diag(np.exp(eigval * br_len)), right))
 
-    # i = 0
-    # dna1 = alignment[i]
-    # dna2 = alignment[i + 1]
-    # for index, base1 in enumerate(dna1):
-    #    base2 = dna2[index]
-    #    f[index] =  p[give_index(base1)][give_index(base1)] * p[give_index(base1)][give_index(base1)]
-    #
-    #
-    # result = np.log(np.sum(f))
-    #
+    k = 0
+    dna1 = alignment[k]
+    dna2 = alignment[k + 1]
+    for index, base1 in enumerate(dna1):
+       base2 = dna2[index]
+       i = give_index(str(base1))
+       j = give_index(str(base2))
+       fun[index] =  p[i][i] * p[i][j]
+
+
+    result = np.log(np.sum(fun))
+
+    # pprint.pprint(p)
     # print(result)
 
-    return p
+    return result
 #===================================================================================================================
 def give_index(c):
     if c == "A":
@@ -281,27 +288,29 @@ def metropolis_hastings(likelihood_computer,prior, transition_model, param_init,
 # ======================================================================================================================
 # ======================================================================================================================
 # ======================================================================================================================
+alignment = dendropy.DnaCharacterMatrix.get\
+    (file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta" , )
 v = np.arange( 0 , 2, 0.01)
 y1 = []
 y2 = []
 d = []
 for i in v:
     # p = transition_probability_matrix_JC(i,i)
-    p = transition_probability_matrix_GTR(['AAAAAGGCAA', 'GGGCTCTTAA'],i)
-    y1.append(p[0][0])
-    y2.append(p[0][1])
-    d.append(i * i)
+    transition_probability_matrix_GTR(alignment,i)
+    # y1.append(p[0][0])
+    # y2.append(p[0][1])
+    # d.append(i * i)
 
 
 
-pprint.pprint(p)
-plt.plot(d, y1, label='P(AA)')
-plt.plot(d, y2, label='P(AC)')
-plt.ylabel('probablity')
-plt.xlabel('v')
-plt.axhline(p[0][0], color='r', ls='-.')
-plt.legend(loc='lower right')
-plt.show()
+# pprint.pprint(p)
+# plt.plot(d, y1, label='P(AA)')
+# plt.plot(d, y2, label='P(AC)')
+# plt.ylabel('probablity')
+# plt.xlabel('v')
+# plt.axhline(p[0][0], color='r', ls='-.')
+# plt.legend(loc='lower right')
+# plt.show()
 
 
 

@@ -6,7 +6,15 @@ import scipy.optimize as spo
 import pprint
 import matplotlib.pyplot as plt
 import numpy.linalg as la
+import dendropy
 
+
+# alignment = dendropy.DnaCharacterMatrix.get\
+#     (file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta" , )
+# print(alignment.sequence_size)
+# print(len(alignment))
+# for seq in alignment.values():
+#    print(seq)
 #=======================================================================================================================
 def f(*param):
     x = param[0]
@@ -172,7 +180,8 @@ def avg_base_frequencies(alignment):
     return [a/float(n) , c/float(n) , g/float(n) , t/float(n)]
 #===================================================================================================================
 def transition_probability_matrix_GTR(alignment,t):
-    n = len(alignment[0])
+    n= alignment.sequence_size
+    # n = len(alignment[0])
     mu = 0
     a = b = c = d = e = f = 1
 
@@ -270,6 +279,9 @@ def  transition_probability_matrix_K80(t,alpha,beta):
 # plt.show()
 
 
+alignment = dendropy.DnaCharacterMatrix.get\
+    (file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta" , )
+print(alignment.sequence_size)
 
 v = np.arange( 0 , 2, 0.01)
 y1 = []
@@ -277,7 +289,7 @@ y2 = []
 d = []
 for i in v:
     # p = transition_probability_matrix_JC(i,i)
-    p = transition_probability_matrix_GTR(['AAAAAGGCAA', 'GGGCTCTTAA'],i)
+    p = transition_probability_matrix_GTR(alignment,i)
     y1.append(p[0][0])
     y2.append(p[0][1])
     d.append(i * i)
