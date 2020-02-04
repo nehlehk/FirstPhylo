@@ -15,11 +15,19 @@ import numpy as np
 import scipy.optimize as spo
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy.linalg as la
 
 
-
-
-
+#===================================================================================================================
+def  transition_probability_matrix_JC(t,beta):
+    q = np.zeros((4, 4))
+    p = np.zeros((4, 4))
+    q[:][:] = beta
+    q[0][0] = q[1][1] = q[2][2] = q[3][3] = -3*beta
+    eigval, eigvec = la.eig(q)
+    eigvec_inv = la.inv(eigvec)
+    p = np.dot(eigvec,np.dot(np.diag(np.exp(eigval * t)), eigvec_inv))
+    return p
 #=======================================================================================================================
 # The first parameter (i.e theta) contains model parameters i.e: in JC69  it just contains edge length v.
 #=======================================================================================================================

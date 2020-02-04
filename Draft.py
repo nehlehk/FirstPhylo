@@ -1,4 +1,6 @@
 # import libraries
+from math import sqrt
+
 import numpy as np
 import scipy.optimize as spo
 import pprint
@@ -167,56 +169,129 @@ def avg_base_frequencies(alignment):
        g += sum_bf['G']
        t += sum_bf['T']
 
-    return a/float(n) , c/float(n) , g/float(n) , t/float(n)
+    return [a/float(n) , c/float(n) , g/float(n) , t/float(n)]
 #===================================================================================================================
-def GTR_matrix(alignment):
+def transition_probability_matrix_GTR(alignment,t):
     n = len(alignment[0])
     mu = 0
-    a = b = c = d = e = f = 0
-    ratio_matrix =ratio_matrix_computation(alignment)
-    a = ratio_matrix['A']['G'] + ratio_matrix['G']['A']
-    b = ratio_matrix['A']['C'] + ratio_matrix['C']['A']
-    c = ratio_matrix['A']['T'] + ratio_matrix['T']['A']
-    d = ratio_matrix['G']['C'] + ratio_matrix['C']['G']
-    e = ratio_matrix['G']['T'] + ratio_matrix['T']['G']
-    f = ratio_matrix['C']['T'] + ratio_matrix['T']['C']
-    pi_a, pi_c, pi_g , pi_t = avg_base_frequencies(alignment)
-    mu = 1 / (2 * (a*pi_a*pi_c) + (b*pi_a*pi_g) + (c*pi_a*pi_t) + (d*pi_c*pi_g) + (e*pi_c*pi_t) + (pi_g*pi_t))
+    a = b = c = d = e = f = 1
 
-    Q = np.zeros((4, 4))
+    freq = np.zeros((4, 4))
+    q = np.zeros((4, 4))
+    sqrtPi =  np.zeros((4, 4))
+    sqrtPiInv =  np.zeros((4, 4))
+    exchang = np.zeros((4, 4))
+    s = np.zeros((4, 4))
+
+    # ratio_matrix =ratio_matrix_computation(alignment)
+
+    # pi = avg_base_frequencies(alignment)
+    pi = [0.25,0.25,0.25,0.25]
+    freq = np.diag(pi)
+    sqrtPi = np.diag(np.sqrt(pi))
+    sqrtPiInv = np.diag(1.0/np.sqrt(pi))
+
+    mu = 1 / (2 * (a * pi[0] * pi[1]) + (b * pi[0] * pi[2]) + (c * pi[0] * pi[3]) + (d * pi[1] * pi[2]) + (
+                e * pi[1] * pi[3]) + (pi[2] * pi[3]))
+
+    exchang[0][1] = exchang[1][0] = a
+    exchang[0][2] = exchang[2][0] = b
+    exchang[0][3] = exchang[3][0] = c
+    exchang[1][2] = exchang[2][1] = d
+    exchang[1][3] = exchang[3][1] = e
+    exchang[2][3] = exchang[3][2] = f
+
+    q = np.multiply(np.dot(exchang,freq), mu)
 
 
+    for i in range(4):
+        q[i][i] = -sum(q[i][0:4])
+
+
+    s = np.dot(sqrtPi,np.dot(q,sqrtPiInv))
+
+    eigval, eigvec = la.eig(s)
+    eigvec_inv = la.inv(eigvec)
+
+    left = np.dot(sqrtPi,eigvec)
+    right = np.dot(eigvec_inv,sqrtPiInv)
+
+    p = np.dot(left, np.dot(np.diag(np.exp(eigval * t)), right))
+
+    # pprint.pprint(p)
+    #
+    return p
 #===================================================================================================================
-def  transition_probability_matrix(t,beta):
+def  transition_probability_matrix_JC(t,beta):
     q = np.zeros((4, 4))
     p = np.zeros((4, 4))
     q[:][:] = beta
     q[0][0] = q[1][1] = q[2][2] = q[3][3] = -3*beta
+    # pprint.pprint(q)
     eigval, eigvec = la.eig(q)
     eigvec_inv = la.inv(eigvec)
     p = np.dot(eigvec,np.dot(np.diag(np.exp(eigval * t)), eigvec_inv))
     return p
 #===================================================================================================================
-v = np.arange( 0 , 1.1, 0.01)
+def  transition_probability_matrix_K80(t,alpha,beta):
+    q = np.zeros((4, 4))
+    p = np.zeros((4, 4))
+    q[:][:] = beta
+    q[0][1] = q[1][0] = q[2][3] = q[3][2] = alpha
+    q[0][0] = q[1][1] = q[2][2] = q[3][3] = -(alpha + 2 * beta)
+    # pprint.pprint(q)
+    eigval, eigvec = la.eig(q)
+    eigvec_inv = la.inv(eigvec)
+    p = np.dot(eigvec,np.dot(np.diag(np.exp(eigval * t)), eigvec_inv))
+    return p
+#===================================================================================================================
+# v = np.arange( 0 , 1.1, 0.01)
+# y1 = []
+# y2 = []
+# y3 = []
+# d = []
+# for i in v:
+#     p = transition_probability_matrix_K80(i,i,2*i)
+#     y1.append(p[0][0])
+#     y2.append(p[0][1])
+#     y3.append(p[0][2])
+#     d.append((p[0][1]+2*p[0][2])* i)
+#
+#
+#
+# pprint.pprint(p)
+# plt.plot(d, y1, label='P(AA)')
+# plt.plot(d, y2, label='P(AC)')
+# plt.plot(d, y3, label='P(AG)')
+# plt.ylabel('probablity')
+# plt.xlabel('v')
+# plt.axhline(q[0][0], color='r', ls='-.')
+# plt.legend(loc='lower right')
+# plt.show()
+
+
+
+v = np.arange( 0 , 2, 0.01)
 y1 = []
 y2 = []
 d = []
 for i in v:
-    q = transition_probability_matrix(i,i)
-    pprint.pprint(q)
-    y1.append(q[0][1])
-    y2.append(q[0][0])
-    d.append(i*i)
+    # p = transition_probability_matrix_JC(i,i)
+    p = transition_probability_matrix_GTR(['AAAAAGGCAA', 'GGGCTCTTAA'],i)
+    y1.append(p[0][0])
+    y2.append(p[0][1])
+    d.append(i * i)
 
 
-plt.plot(d, y1, label='P(CT)')
-plt.plot(d, y2, label='P(CC)')
+
+pprint.pprint(p)
+plt.plot(d, y1, label='P(AA)')
+plt.plot(d, y2, label='P(AC)')
 plt.ylabel('probablity')
 plt.xlabel('v')
+plt.axhline(p[0][0], color='r', ls='-.')
 plt.legend(loc='lower right')
 plt.show()
-#
-
 
 
 
