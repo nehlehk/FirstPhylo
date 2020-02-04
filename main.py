@@ -20,7 +20,7 @@ import pprint
 
 
 #=======================================================================================================================
-def transition_probability_matrix_GTR(alignment,t ,a = 1 , b = 1 , c = 1 , d = 1 , e = 1 , f = 1):
+def transition_probability_matrix_GTR(alignment,br_len ,a = 1 , b = 1 , c = 1 , d = 1 , e = 1 , f = 1):
     n = len(alignment[0])
     mu = 0
 
@@ -62,9 +62,31 @@ def transition_probability_matrix_GTR(alignment,t ,a = 1 , b = 1 , c = 1 , d = 1
     left = np.dot(sqrtPi,eigvec)
     right = np.dot(eigvec_inv,sqrtPiInv)
 
-    p = np.dot(left, np.dot(np.diag(np.exp(eigval * t)), right))
+    p = np.dot(left, np.dot(np.diag(np.exp(eigval * br_len)), right))
+
+    # i = 0
+    # dna1 = alignment[i]
+    # dna2 = alignment[i + 1]
+    # for index, base1 in enumerate(dna1):
+    #    base2 = dna2[index]
+    #    f[index] =  p[give_index(base1)][give_index(base1)] * p[give_index(base1)][give_index(base1)]
+    #
+    #
+    # result = np.log(np.sum(f))
+    #
+    # print(result)
 
     return p
+#===================================================================================================================
+def give_index(c):
+    if c == "A":
+        return 0
+    elif c == "C":
+        return 1
+    elif c == "G":
+        return 2
+    elif c == "T":
+        return 3
 #===================================================================================================================
 def ratio_matrix_computation(dna_list):
     i = 0
@@ -255,6 +277,9 @@ def metropolis_hastings(likelihood_computer,prior, transition_model, param_init,
 
 
     return np.array(final_log_acc) , np.array(final_log_rej) , np.array(accepted) , np.array(rejected) , np.array(all_theta)
+# ======================================================================================================================
+# ======================================================================================================================
+# ======================================================================================================================
 # ======================================================================================================================
 v = np.arange( 0 , 2, 0.01)
 y1 = []
