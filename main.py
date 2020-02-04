@@ -10,20 +10,19 @@ Authors: Nehleh Kargarfard
 import sys
 import math
 from builtins import print
-
 import numpy as np
 import scipy.optimize as spo
 import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy.linalg as la
 import pprint
+# from Bio import SeqIO
 
 
 #=======================================================================================================================
-def transition_probability_matrix_GTR(alignment,t):
+def transition_probability_matrix_GTR(alignment,t ,a = 1 , b = 1 , c = 1 , d = 1 , e = 1 , f = 1):
     n = len(alignment[0])
     mu = 0
-    a = b = c = d = e = f = 1
 
     freq = np.zeros((4, 4))
     q = np.zeros((4, 4))
@@ -31,8 +30,6 @@ def transition_probability_matrix_GTR(alignment,t):
     sqrtPiInv =  np.zeros((4, 4))
     exchang = np.zeros((4, 4))
     s = np.zeros((4, 4))
-
-    # ratio_matrix =ratio_matrix_computation(alignment)
 
     # pi = avg_base_frequencies(alignment)
     pi = [0.25,0.25,0.25,0.25]
