@@ -21,8 +21,37 @@ import pprint
 import dendropy
 
 
+
+
+
+def get_base_frequencies(dna):
+    base_freq =  {base: dna.count(base)/float(len(dna)) for base in 'ACGT'}
+
+    return  base_freq
+#===================================================================================================================
+def avg_base_frequencies(alignment):
+    n = len(alignment)
+    a = c = g = t = 0
+    for align in alignment:
+       sum_bf =  get_base_frequencies(align)
+       a += sum_bf['A']
+       c += sum_bf['C']
+       g += sum_bf['G']
+       t += sum_bf['T']
+
+    return [a/float(n) , c/float(n) , g/float(n) , t/float(n)]
+#===================================================================================================================
+def give_index(c):
+    if c == "A":
+        return 0
+    elif c == "C":
+        return 1
+    elif c == "G":
+        return 2
+    elif c == "T":
+        return 3
 #=======================================================================================================================
-def transition_probability_matrix_GTR(alignment,br_len ,a = 1 , b = 1 , c = 1 , d = 1 , e = 1 , f = 1):
+def GTR(alignment,br_len ,pi = []*4 ,a = 1 , b = 1 , c = 1 , d = 1 , e = 1 , f = 1):
     n = alignment.sequence_size
     # n = len(alignment[0])
     mu = 0
@@ -36,7 +65,7 @@ def transition_probability_matrix_GTR(alignment,br_len ,a = 1 , b = 1 , c = 1 , 
     fun = np.zeros(n)
 
     # pi = avg_base_frequencies(alignment)
-    pi = [0.25,0.25,0.25,0.25]
+    # pi = [0.25,0.25,0.25,0.25]
     freq = np.diag(pi)
     sqrtPi = np.diag(np.sqrt(pi))
     sqrtPiInv = np.diag(1.0/np.sqrt(pi))
@@ -75,26 +104,34 @@ def transition_probability_matrix_GTR(alignment,br_len ,a = 1 , b = 1 , c = 1 , 
        base2 = dna2[index]
        i = give_index(str(base1))
        j = give_index(str(base2))
-       fun[index] =  p[i][i] * p[i][j]
+       fun[index] =  pi[i] * p[i][j]
 
 
-    result = np.log(np.sum(fun))
+    ll = np.log(np.sum(fun))
 
-    # pprint.pprint(p)
-    # print(result)
+    return ll
+#===================================================================================================================
+def max_likeGTR(alignment):
 
+    initial_guess = alignment,0.1,[0.28,0.22,0.20,0.3]
+    result = spo.minimize(GTR , initial_guess ,method='nelder-mead' , options={'disp' : True}) #, options={'disp' : True}
+    print("Result by using scipy:")
+    print("theta = {} , MLE = {}".format(result.x, result.fun))
     return result
-#===================================================================================================================
-def give_index(c):
-    if c == "A":
-        return 0
-    elif c == "C":
-        return 1
-    elif c == "G":
-        return 2
-    elif c == "T":
-        return 3
-#===================================================================================================================
+#=======================================================================================================================
+
+alignment = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta" , )
+
+# max_likeGTR(alignment)
+
+ll = GTR(alignment,0.1,[0.28,0.22,0.20,0.3],0.3,0.1,0.1,0.1,0.4,1)
+
+print(ll)
+
+
+
+
+#=======================================================================================================================
 def ratio_matrix_computation(dna_list):
     i = 0
     seq_count = len(dna_list)
@@ -117,24 +154,6 @@ def ratio_matrix_computation(dna_list):
         # i += 1
 
     return ratio_matrix
-#===================================================================================================================
-def get_base_frequencies(dna):
-    base_freq =  {base: dna.count(base)/float(len(dna))
-             for base in 'ACGT'}
-
-    return  base_freq
-#===================================================================================================================
-def avg_base_frequencies(alignment):
-    n = len(alignment)
-    a = c = g = t = 0
-    for align in alignment:
-       sum_bf =  get_base_frequencies(align)
-       a += sum_bf['A']
-       c += sum_bf['C']
-       g += sum_bf['G']
-       t += sum_bf['T']
-
-    return [a/float(n) , c/float(n) , g/float(n) , t/float(n)]
 #===================================================================================================================
 def  transition_probability_matrix_JC(t,beta):
     q = np.zeros((4, 4))
@@ -180,7 +199,7 @@ def log_likelihood(theta, data = None, model = 'JC69'):
 #=======================================================================================================================
 def max_like():
     initial_guess = 0.2
-    result = spo.minimize(log_likelihood , initial_guess ,method='nelder-mead') #, options={'disp' : True}
+    result = spo.minimize(log_likelihood , initial_guess ,method='nelder-mead' , options={'disp' : True}) #, options={'disp' : True}
     print("Result by using scipy:")
     print("theta = {} , MLE = {}".format(result.x, result.fun))
     return result.x
@@ -208,6 +227,22 @@ def plot_MLE():
     ll_array = []
     for i in d:
         y_plot = -log_likelihood([i])
+        ll_array.append(y_plot)
+
+    plt.plot(d, ll_array, label='fitted model')
+    plt.axvline(max_like(), color='r', ls='-.')
+    plt.title(str(float(max_like()))+"  is the maximum likelihood estimate (MLE) of v")
+    plt.ylabel('log(L)')
+    plt.xlabel('v')
+    #plt.legend(loc='lower right')
+    plt.show()
+
+#=======================================================================================================================
+def plot_MLE_GTR():
+    d = np.arange(0.0001, 1 , 0.01)
+    ll_array = []
+    for i in d:
+        y_plot = max_likeGTR()
         ll_array.append(y_plot)
 
     plt.plot(d, ll_array, label='fitted model')
@@ -290,13 +325,17 @@ def metropolis_hastings(likelihood_computer,prior, transition_model, param_init,
 # ======================================================================================================================
 alignment = dendropy.DnaCharacterMatrix.get\
     (file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta" , )
-v = np.arange( 0 , 2, 0.01)
-y1 = []
-y2 = []
-d = []
-for i in v:
-    # p = transition_probability_matrix_JC(i,i)
-    transition_probability_matrix_GTR(alignment,i)
+
+
+
+
+# v = np.arange( 0 , 2, 0.01)
+# y1 = []
+# y2 = []
+# d = []
+# for i in v:
+#     # p = transition_probability_matrix_JC(i,i)
+#     transition_probability_matrix_GTR(alignment,i)
     # y1.append(p[0][0])
     # y2.append(p[0][1])
     # d.append(i * i)
@@ -386,3 +425,4 @@ for i in v:
 #
 # plt.show()
 
+# max_like()
