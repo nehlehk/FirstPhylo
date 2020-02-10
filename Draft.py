@@ -7,7 +7,7 @@ import pprint
 import matplotlib.pyplot as plt
 import numpy.linalg as la
 import dendropy
-
+import tensorflow as tf
 
 # alignment = dendropy.DnaCharacterMatrix.get\
 #     (file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta" , )
@@ -279,31 +279,31 @@ def  transition_probability_matrix_K80(t,alpha,beta):
 # plt.show()
 
 
-alignment = dendropy.DnaCharacterMatrix.get\
-    (file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta" , )
-print(alignment.sequence_size)
-
-v = np.arange( 0 , 2, 0.01)
-y1 = []
-y2 = []
-d = []
-for i in v:
-    # p = transition_probability_matrix_JC(i,i)
-    p = transition_probability_matrix_GTR(alignment,i)
-    y1.append(p[0][0])
-    y2.append(p[0][1])
-    d.append(i * i)
-
-
-
-pprint.pprint(p)
-plt.plot(d, y1, label='P(AA)')
-plt.plot(d, y2, label='P(AC)')
-plt.ylabel('probablity')
-plt.xlabel('v')
-plt.axhline(p[0][0], color='r', ls='-.')
-plt.legend(loc='lower right')
-plt.show()
+# alignment = dendropy.DnaCharacterMatrix.get\
+#     (file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta" , )
+# print(alignment.sequence_size)
+#
+# v = np.arange( 0 , 2, 0.01)
+# y1 = []
+# y2 = []
+# d = []
+# for i in v:
+#     # p = transition_probability_matrix_JC(i,i)
+#     p = transition_probability_matrix_GTR(alignment,i)
+#     y1.append(p[0][0])
+#     y2.append(p[0][1])
+#     d.append(i * i)
+#
+#
+#
+# pprint.pprint(p)
+# plt.plot(d, y1, label='P(AA)')
+# plt.plot(d, y2, label='P(AC)')
+# plt.ylabel('probablity')
+# plt.xlabel('v')
+# plt.axhline(p[0][0], color='r', ls='-.')
+# plt.legend(loc='lower right')
+# plt.show()
 
 
 
@@ -363,3 +363,4 @@ plt.show()
 #test_run()
 # loglik(3,7,[3,4,5])
 #Max_LL2()
+

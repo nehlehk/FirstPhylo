@@ -24,8 +24,10 @@ def log_likelihood(theta, data = None, model = 'JC69'):
     if model == 'JC69':
         # ===================   for two sequences   =======================
         v = theta
-        p0 =  0.25 + 0.75 * math.exp(-4 * v / 3)
-        p1 =  0.75 - 0.75 * math.exp(-4 * v / 3)
+        # p0 =  0.25 + 0.75 * math.exp(-4 * v / 3)
+        # p1 =  0.75 - 0.75 * math.exp(-4 * v / 3)
+        p0 = 1 / 16 + 3 / 16 * math.exp(-4 * v / 3)
+        p1 = 1 / 16 - 1 / 16 * math.exp(-4 * v / 3)
         y = (n-x)* np.log(p0) + x * np.log(p1)
         # negLL = -y
         # print("v = {} , y = {}  , negLL = {} ".format(v, y , negLL))  # for tracing
