@@ -89,8 +89,8 @@ def max_likeGTR():
     bounds =  Bounds([0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0], [5, 5, 5, 5, 5, 5 , 1,1,1,1])
     result = spo.minimize(GTR , initial_guess , method='trust-constr' , bounds = bounds, constraints= cons ,options={'verbose': 1} )
     print("Result by using scipy:")
-    print("d = {} , a ={} , b = {} , c= {} , d = {} , e {}, pi_A ={} , pi_C ={} ,pi_G ={} ,pi_T ={} "
-          "MLE = {}".format(result.x[0],result.x[1],result.x[2],result.x[3],result.x[4],result.x[5],
+    print("edge_length = {} , a ={} , b = {} , c= {} , d = {} , e {}, pi_A ={} , pi_C ={} ,pi_G ={} ,pi_T ={} "
+          "likelihood = {}".format(result.x[0],result.x[1],result.x[2],result.x[3],result.x[4],result.x[5],
                             result.x[6],result.x[7],result.x[8],result.x[9], -result.fun))
     return result
 #=======================================================================================================================
