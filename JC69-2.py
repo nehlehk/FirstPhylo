@@ -56,8 +56,8 @@ def  JC(param):
     fun = np.zeros(n)
     beta = 0.25
 
-    q[:][:] = beta
-    q[0][0] = q[1][1] = q[2][2] = q[3][3] = -3*beta
+    q[:][:] = 1/3
+    q[0][0] = q[1][1] = q[2][2] = q[3][3] = -1
     # pprint.pprint(q)
     eigval, eigvec = la.eig(q)
     eigvec_inv = la.inv(eigvec)
