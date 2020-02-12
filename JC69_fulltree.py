@@ -13,25 +13,7 @@ def give_index(c):
         return 2
     elif c == "T":
         return 3
-#=======================================================================================================================
-def  JC(param):
-    n = alignment.sequence_size
-    q = np.zeros((4, 4))
-    p = np.zeros((4, 4))
-    fun = np.zeros(n)
-
-    q[:][:] = 1/3
-    q[0][0] = q[1][1] = q[2][2] = q[3][3] = -1
-    # pprint.pprint(q)
-    eigval, eigvec = la.eig(q)
-    eigvec_inv = la.inv(eigvec)
-    p = np.dot(eigvec,np.dot(np.diag(np.exp(eigval * param[0])), eigvec_inv))
-
-
-    # pprint.pprint(p)
-    #
-    return p
-#===================================================================================================================
+# =======================================================================================================
 
 column = 'CGCC'
 
