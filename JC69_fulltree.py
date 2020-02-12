@@ -14,7 +14,6 @@ def give_index(c):
     elif c == "T":
         return 3
 # =======================================================================================================
-
 column = 'CGCC'
 
 s = 4 #tips number
@@ -34,17 +33,19 @@ pprint.pprint(p)
 post_order =[]
 
 
-# for  index, lf in enumerate(mytree.leaf_nodes()):
-#     i = give_index(column[index])
-#     partial[i][index] = 1
+for  index, lf in enumerate(mytree.leaf_nodes()):
+    i = give_index(column[index])
+    partial[i][index] = 1
+
+
 
 for index,node in enumerate(mytree.postorder_node_iter()):
     post_order.append(node.taxon)
-    if node.is_leaf():
-        i = give_index(column[index])
-        partial[i][index] = 1
-    else:
-    # if not node.is_leaf():
+    # if node.is_leaf():
+    #     i = give_index(column[index])
+    #     partial[i][index] = 1
+    # else:
+    if not node.is_leaf():
         children = node.child_nodes()
         leftchild =  post_order.index(children[0].taxon)
         rightchild = post_order.index(children[1].taxon)
@@ -55,6 +56,7 @@ for index,node in enumerate(mytree.postorder_node_iter()):
                 left += p[j][k] * partial[k][leftchild]
                 right += p[j][k] * partial[k][rightchild]
             partial[j][index] = left * right
+
 
 
 print(partial)
