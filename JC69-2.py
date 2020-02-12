@@ -54,7 +54,6 @@ def  JC(param):
     q = np.zeros((4, 4))
     p = np.zeros((4, 4))
     fun = np.zeros(n)
-    beta = 0.25
 
     q[:][:] = 1/3
     q[0][0] = q[1][1] = q[2][2] = q[3][3] = -1
@@ -130,5 +129,7 @@ pi = [0.25]*4
 alignment = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/test.fasta"), schema="fasta")
 
 max_like()
+
+
 
 # plot_MLE()
