@@ -74,14 +74,3 @@ print("likelihood = {} and log-likelihood = {} ".format(round(ll,7) , round(np.l
 
 
 
-
-
-# tree.print_plot()
-
-
-
-
-
-
-
-
