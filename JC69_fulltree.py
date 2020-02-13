@@ -1,8 +1,7 @@
-import dendropy
+from dendropy import Tree, DnaCharacterMatrix
 import numpy as np
 import math
-import numpy.linalg as la
-import pprint
+
 
 def give_index(c):
     if c == "A":
@@ -14,48 +13,52 @@ def give_index(c):
     elif c == "T":
         return 3
 # =======================================================================================================
-column = 'CGCC'
+dna = 'CGCC'
 
-s = 4 #tips number
+tips = 4 #tips number
 br_length = 0.1
 p = np.zeros((4, 4))
 
-mytree = dendropy.Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/tree.tre', 'newick')
-partial = np.zeros((4,2*s -2))
+# tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/tree.tre', 'newick') (3,4,(1,2)5)6;
+tree = Tree.get_from_string('((1,2)5,3,4)6;', 'newick')
+partial = np.zeros((4,2*tips))
 
 for i in range(4):
     for j in range(4):
         p[i][j] = 0.25 - 0.25* math.exp(-4*br_length/3)
     p[i][i] = 0.25 + 0.75*math.exp(-4*br_length/3)
-
-pprint.pprint(p)
-
-post_order =[]
+# pprint.pprint(p)
 
 
-for  index, lf in enumerate(mytree.leaf_nodes()):
-    i = give_index(column[index])
-    partial[i][index] = 1
+for node in tree.postorder_node_iter():
+    node.index = -1
+    node.annotations.add_bound_attribute("index")
 
-
-
-for index,node in enumerate(mytree.postorder_node_iter()):
-    post_order.append(node.taxon)
-    # if node.is_leaf():
-    #     i = give_index(column[index])
-    #     partial[i][index] = 1
-    # else:
+s = tips + 1
+for id,node in enumerate(tree.postorder_node_iter()):
     if not node.is_leaf():
-        children = node.child_nodes()
-        leftchild =  post_order.index(children[0].taxon)
-        rightchild = post_order.index(children[1].taxon)
-        for j in range(4):
-            left = 0
-            right = 0
-            for k in range(4):
-                left += p[j][k] * partial[k][leftchild]
-                right += p[j][k] * partial[k][rightchild]
-            partial[j][index] = left * right
+        node.index = s
+        s += 1
+    else:
+        for idx, name in enumerate(dna):
+            if idx +1 == int(node.taxon.label):
+                node.index = idx+1
+                break
+
+
+for node in tree.postorder_node_iter():
+    if node.is_leaf():
+        i = give_index(dna[node.index-1])
+        partial[i][node.index-1] = 1
+    else:
+            for j in range(4):
+                sump = []
+                for x in node.child_node_iter():
+                    z = 0
+                    for k in range(4):
+                       z  += p[j][k] * partial[k][x.index-1]
+                    sump.append(z)
+                partial[j][node.index-1] = np.prod(sump)
 
 
 
@@ -65,7 +68,7 @@ print(partial)
 
 
 
-# mytree.print_plot()
+tree.print_plot()
 
 
 
