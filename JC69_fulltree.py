@@ -41,7 +41,7 @@ for id,node in enumerate(tree.postorder_node_iter()):
         s += 1
     else:
         for idx, name in enumerate(dna):
-            if idx +1 == int(node.taxon.label):
+            if idx + 1 == int(node.taxon.label):
                 node.index = idx+1
                 break
 
@@ -61,14 +61,22 @@ for node in tree.postorder_node_iter():
                 partial[j][node.index-1] = np.prod(sump)
 
 
+# print(partial)
 
-print(partial)
+ll = sum(partial[:,2*tips -3] * 0.25)
+
+print("likelihood = {} and log-likelihood = {} ".format(round(ll,7) , round(np.log(ll),7)))
 
 
 
 
 
-tree.print_plot()
+
+
+
+
+
+# tree.print_plot()
 
 
 
