@@ -21,6 +21,11 @@ p = np.zeros((4, 4))
 
 # tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/tree.tre', 'newick') (3,4,(1,2)5)6;
 tree = Tree.get_from_string('((1,2)5,3,4)6;', 'newick')
+
+# internal_idx = len(tree.taxon_namespace)
+
+# print(internal_idx)
+
 partial = np.zeros((4,2*tips))
 
 for i in range(4):
