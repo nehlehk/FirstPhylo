@@ -45,9 +45,9 @@ def posterior_numerical(param):
 
 
 def elbo(param):
-    d = param[0]
-    gam1 = param[1]
-    gam2 = param[2]
+    # d = param[0]
+    gam1 = param[0]
+    gam2 = param[1]
     q = lambda d,gam1,gam2: gamma(a=gam1, scale=gam2, loc=0).pdf(d)
     eq1 = lambda d: q(d,gam1,gam2) * np.log(1 / 4 - 1 / 4 * np.exp(-4 / 3 * d))
     one, err1 = quad(eq1, 0, np.inf)
@@ -61,25 +61,27 @@ def elbo(param):
             + (gam2 - beta) * (gam1/gam2) \
             - gam1 * np.log(gam2) \
             + loggamma(gam1)
-    return -total
+    return total
 
 
 
 def max_param():
-    initial_guess = [0.2,0.1,0.1]
-    bounds =  Bounds([0.0001 , 0.0001 , 0.0001], [10, 10, 10])
+    initial_guess = [1,1]
+    bounds =  Bounds([0.0001 , 0.0001], [10, 10])
     result = spo.minimize(elbo , initial_guess , method='trust-constr' , bounds = bounds, options={'verbose': 1} )
-    print("edge_length = {} , gamma1 ={} , gamma2 = {} , density={}".format(result.x[0],result.x[1],result.x[2], -result.fun))
-    return result.x[1],result.x[2]
+    print(" gamma1 ={} , gamma2 = {} , density={}".format(result.x[0],result.x[1], result.fun))
+    return result.x[0],result.x[1]
 
 
 g1, g2 = max_param()
 
 true  = []
 estimate = []
-d = np.arange(0.01, 0.2, 0.002)
+d = np.arange(0.01, 20, 0.2)
 for i in d:
     y_true = posterior_numerical(i)
+    # y_estimate = gamma(a=7.839, scale=2.275, loc=0).pdf(i)
+    # print(y_estimate)
     y_estimate = gamma(a=g1, scale=g2, loc=0).pdf(i)
     true.append(y_true)
     estimate.append(y_estimate)
