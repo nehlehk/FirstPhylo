@@ -61,18 +61,21 @@ def max_param():
     result = spo.minimize(elbo , initial_guess , method='trust-constr' , bounds = bounds, options={'verbose': 1} )
     print("Result by using scipy:")
     print("edge_length = {} , gamma1 ={} , gamma2 = {}".format(result.x[0],result.x[1],result.x[2]))
-    return result
+    return result.x[0],result.x[1],result.x[2]
 
 
+l, g1, g2 = max_param()
 
-max_param()
-
-ll_array = []
+true  = []
+estimate = []
 d = np.arange(0.01, 0.2, 0.002)
 for i in d:
-    y_plot = posterior_numerical(i)
-    ll_array.append(y_plot)
-plt.plot(d, ll_array, label='true posterior')
+    y_true = posterior_numerical(i)
+    y_estimate = gamma(a=g1, scale=g2, loc=0).pdf(i)
+    true.append(y_true)
+    estimate.append(y_estimate)
+plt.plot(d, true, label='true posterior')
+plt.plot(d, estimate, label='estimate posterior')
 plt.ylabel('density')
 plt.xlabel('d')
 plt.legend(loc='upper right')
