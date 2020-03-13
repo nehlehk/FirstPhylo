@@ -3,7 +3,7 @@ import dendropy
 from dendropy.simulate import treesim
 
 
-tips_number = 20
+tips_number = 4
 
 temp = []
 for i in range(tips_number):
