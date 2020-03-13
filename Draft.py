@@ -8,14 +8,14 @@ import math
 
 
 
-alignment = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/test/test.fasta"), schema="fasta")
+alignment = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/JC69_100.fasta"), schema="fasta")
 
-for j in range(len(alignment)):
+for i in range(alignment.sequence_size):
     s = ''
-    for i in range(alignment.sequence_size):
-            s += str(alignment[i][j])
-            # for idx, name in enumerate(alignment[i][:]):
-            #     print(idx,name)
+    for j in range(len(alignment)):
+        s += str(alignment[j][i])
+        # for idx, name in enumerate(alignment[i][:]):
+        #     print(idx,name)
     print(s)
 
 
