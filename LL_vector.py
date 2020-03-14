@@ -1,5 +1,3 @@
-from builtins import print
-
 from dendropy import Tree, DnaCharacterMatrix
 import numpy
 import math
