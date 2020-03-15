@@ -5,31 +5,16 @@ import pprint
 import numpy.linalg as la
 import dendropy
 import math
-
-
-
-alignment = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/JC69_100.fasta"), schema="fasta")
-
-for i in range(alignment.sequence_size):
-    s = ''
-    for j in range(len(alignment)):
-        s += str(alignment[j][i])
-        # for idx, name in enumerate(alignment[i][:]):
-        #     print(idx,name)
-    print(s)
-
-
-# for d in range(alignment.sequence_size):
-#     print(alignment[][d])
-    # for idx, name in enumerate(alignment[d][:]):
-    #     print(idx,name)
+import sys
+import os
 
 
 
 
-# print(ll)
 
-# print(partial)
+cmd = '/home/nehleh/0_Research/Software/Seq-Gen-1.3.4/source/seq-gen'
+os.system(cmd)
+
 
 
 
