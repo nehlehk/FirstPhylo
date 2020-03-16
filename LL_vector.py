@@ -4,6 +4,7 @@ import math
 import dendropy
 import numpy.linalg as la
 import pprint
+import csv
 
 p = numpy.zeros((4, 4))
 
@@ -17,59 +18,58 @@ def give_index(c):
         return 2
     elif c == "T":
         return 3
-
-
 # =======================================================================================================
-def computelikelihood(tree,dna,model):
-
-    partial = numpy.zeros((4, 2 * tips))
-
+def p_matrix(br_length,model):
+    p = numpy.zeros((4, 4))
     if model == 'JC69':
-        p = numpy.zeros((4, 4))
         for i in range(4):
             for j in range(4):
                 p[i][j] = 0.25 - 0.25 * math.exp(-4 * br_length / 3)
             p[i][i] = 0.25 + 0.75 * math.exp(-4 * br_length / 3)
+    elif model == 'GTR':
+        mu = 0
+        freq = numpy.zeros((4, 4))
+        q = numpy.zeros((4, 4))
+        sqrtPi = numpy.zeros((4, 4))
+        sqrtPiInv = numpy.zeros((4, 4))
+        exchang = numpy.zeros((4, 4))
+        s = numpy.zeros((4, 4))
+        fun = numpy.zeros(1)
+        a, b, c, d, e = rates
+        f = 1
 
+        freq = numpy.diag(pi)
+        sqrtPi = numpy.diag(numpy.sqrt(pi))
+        sqrtPiInv = numpy.diag(1.0 / numpy.sqrt(pi))
+        mu = 1 / (2 * ((a * pi[0] * pi[1]) + (b * pi[0] * pi[2]) + (c * pi[0] * pi[3]) + (d * pi[1] * pi[2]) + (
+                e * pi[1] * pi[3]) + (pi[2] * pi[3])))
+        exchang[0][1] = exchang[1][0] = a
+        exchang[0][2] = exchang[2][0] = b
+        exchang[0][3] = exchang[3][0] = c
+        exchang[1][2] = exchang[2][1] = d
+        exchang[1][3] = exchang[3][1] = e
+        exchang[2][3] = exchang[3][2] = f
 
-    if model == 'GTR':
-         mu = 0
-         freq = numpy.zeros((4, 4))
-         q = numpy.zeros((4, 4))
-         sqrtPi = numpy.zeros((4, 4))
-         sqrtPiInv = numpy.zeros((4, 4))
-         exchang = numpy.zeros((4, 4))
-         s = numpy.zeros((4, 4))
-         fun = numpy.zeros(alignment_len)
+        q = numpy.multiply(numpy.dot(exchang, freq), mu)
 
-         freq = numpy.diag(pi)
-         sqrtPi = numpy.diag(numpy.sqrt(pi))
-         sqrtPiInv = numpy.diag(1.0 / numpy.sqrt(pi))
-         mu = 1 / (2 * ((a * pi[0] * pi[1]) + (b * pi[0] * pi[2]) + (c * pi[0] * pi[3]) + (d * pi[1] * pi[2]) + (
-                 e * pi[1] * pi[3]) + (pi[2] * pi[3])))
-         exchang[0][1] = exchang[1][0] = a
-         exchang[0][2] = exchang[2][0] = b
-         exchang[0][3] = exchang[3][0] = c
-         exchang[1][2] = exchang[2][1] = d
-         exchang[1][3] = exchang[3][1] = e
-         exchang[2][3] = exchang[3][2] = f
+        for i in range(4):
+            q[i][i] = -sum(q[i][0:4])
 
-         q = numpy.multiply(numpy.dot(exchang, freq), mu)
+        s = numpy.dot(sqrtPi, numpy.dot(q, sqrtPiInv))
 
-         for i in range(4):
-             q[i][i] = -sum(q[i][0:4])
+        eigval, eigvec = la.eig(s)
+        eigvec_inv = la.inv(eigvec)
 
-         s = numpy.dot(sqrtPi, numpy.dot(q, sqrtPiInv))
+        left = numpy.dot(sqrtPi, eigvec)
+        right = numpy.dot(eigvec_inv, sqrtPiInv)
 
-         eigval, eigvec = la.eig(s)
-         eigvec_inv = la.inv(eigvec)
+        p = numpy.dot(left, numpy.dot(numpy.diag(numpy.exp(eigval * br_length)), right))
 
-         left = numpy.dot(sqrtPi, eigvec)
-         right = numpy.dot(eigvec_inv, sqrtPiInv)
+    return p
+# =======================================================================================================
+def computelikelihood(tree,dna,model):
 
-         p = numpy.dot(left, numpy.dot(numpy.diag(numpy.exp(eigval * br_length)), right))
-
-
+    partial = numpy.zeros((2 * tips,4))
 
     for node in tree.postorder_node_iter():
         node.index = -1
@@ -91,47 +91,58 @@ def computelikelihood(tree,dna,model):
             i = give_index(str(dna[pos]))
             pos += 1
             # i = give_index(dna[node.index-1])
-            partial[i][node.index] = 1
+            partial[node.index][i] = 1
         else:
-            for j in range(4):
-                sump = []
-                for x in node.child_node_iter():
-                    z = 0
-                    for k in range(4):
-                       z  += p[j][k] * partial[k][x.index]
-                    sump.append(z)
-                partial[j][node.index] = numpy.prod(sump)
+            children = node.child_nodes()
+            partial[node.index] = numpy.dot(p_matrix(children[0].edge_length,model), partial[children[0].index])
+            for i in range(1, len(children)):
+                partial[node.index] *= numpy.dot(p_matrix(children[i].edge_length,model), partial[children[i].index])
 
     # print(partial)
 
-    ll = sum(partial[:,2*tips -1] * 0.25)
+    ll = numpy.sum(partial[tree.seed_node.index]) * 0.25
 
     # print("likelihood = {} and log-likelihood = {} ".format(round(ll,7) , round(numpy.log(ll),7)))
     return round(numpy.log(ll),7)
 #=======================================================================================================================
-rates = numpy.ones(5)
-a, b, c, d, e = rates
+def fillvector(tree,alignment,model):
+    LL_vector = []
+    for l in range(alignment_len):
+        col = ""
+        for t in range(tips):
+            col += str(alignment[t][l])
+        LL_vector.append(computelikelihood(tree, col, model))
+    return LL_vector
+#=======================================================================================================================
+
+pi = [0.2184,0.2606,0.3265,0.1946]
+rates = [2.0431,0.0821,0,0.067,0]
 f = 1
-pi = [0.25]*4
-br_length = 0.1
-LL_vector_JC69 = []
-LL_vector_GTR = []
 
 
 tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/LL_vector/tree.tree', 'newick')
-alignment = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/JC69_100.fasta"), schema="fasta")
+alignment_GTR = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/simulationdata/GTR.fasta"), schema="fasta")
+alignment_JC = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/simulationdata/JC69.fasta"), schema="fasta")
 
 
-tips = len(alignment)
-alignment_len = alignment.sequence_size
+tips = len(alignment_GTR)
+alignment_len = alignment_GTR.sequence_size
 
-for l in range(alignment_len):
-    col = ""
-    for t in range(tips):
-        col += str(alignment[t][l])
-    LL_vector_JC69.append(computelikelihood(tree,col,'JC69'))
-    LL_vector_GTR.append(computelikelihood(tree, col, 'GTR'))
 
-print(LL_vector_JC69)
-print(LL_vector_GTR)
 
+GTRGTRvector = []
+JCJCvector = []
+GTRJCvector = []
+JCGTRvector = []
+
+GTRGTRvector = fillvector(tree,alignment_GTR,'GTR')
+JCJCvector = fillvector(tree,alignment_JC,'JC69')
+GTRJCvector = fillvector(tree,alignment_GTR,'JC69')
+JCGTRvector = fillvector(tree,alignment_JC,'GTR')
+
+
+f = open('/home/nehleh/0_Research/PhD/Data/simulationdata/LL.csv', "a")
+f.write('JC69-JC'+','+'JC-GTR'+','+'GTR-GTR'+','+'GTR-JC'+'\n')
+for i in range(alignment_len):
+    f.write(str(JCJCvector[i])+','+str(JCGTRvector[i])+','+str(GTRGTRvector[i])+','+str(GTRJCvector[i])+'\n')
+f.close()
