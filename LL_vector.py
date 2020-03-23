@@ -121,8 +121,8 @@ f = 1
 
 
 tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/LL_vector/tree.tree', 'newick')
-alignment_GTR = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/simulationdata/GTR.fasta"), schema="fasta")
-alignment_JC = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/simulationdata/JC69.fasta"), schema="fasta")
+alignment_GTR = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/GTR_100.fasta"), schema="fasta")
+alignment_JC = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/JC69_100.fasta"), schema="fasta")
 
 
 tips = len(alignment_GTR)
@@ -141,7 +141,7 @@ GTRJCvector = fillvector(tree,alignment_GTR,'JC69')
 JCGTRvector = fillvector(tree,alignment_JC,'GTR')
 
 
-f = open('/home/nehleh/0_Research/PhD/Data/simulationdata/LL.csv', "a")
+f = open('/home/nehleh/0_Research/PhD/Data/LL_vector/LL.csv', "a")
 f.write('JC69-JC'+','+'JC-GTR'+','+'GTR-GTR'+','+'GTR-JC'+'\n')
 for i in range(alignment_len):
     f.write(str(JCJCvector[i])+','+str(JCGTRvector[i])+','+str(GTRGTRvector[i])+','+str(GTRJCvector[i])+'\n')
