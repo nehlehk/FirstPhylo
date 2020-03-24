@@ -15,19 +15,25 @@ with open('/home/nehleh/0_Research/PhD/Data/simulationdata/likelihoos_JC', 'r') 
             ll.append(float(elem))
         except ValueError:
             pass
-    print(ll[0:10])
 
 
 signal = numpy.array(ll)
 
-print(signal.shape)
+
 
 
 # change point detection
-model = "l2"   # "l1", "rbf", "linear", "normal", "ar"
+model = "l1"   # "l1", "l2", "rbf", "linear", "normal", "ar"
+
 # my_bkps = rpt.Dynp(model=model, min_size=3).fit_predict(signal,n_bkps=3)
-my_bkps = rpt.Window(model=model, width= 15).fit_predict(signal,n_bkps=5)
+
+# my_bkps = rpt.Window(model=model, width= 15).fit_predict(signal,n_bkps=5)
+
+my_bkps = rpt.Pelt(model = model, min_size=5, jump=100).fit_predict(signal,pen=3*numpy.log(signal.shape[0]))
+
+
+
 print(my_bkps)
 # show results
-rpt.show.display(signal, my_bkps , figsize =(8,3))
+rpt.show.display(signal, my_bkps , figsize =(15,7))
 plt.show()
