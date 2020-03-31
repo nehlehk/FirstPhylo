@@ -8,12 +8,12 @@ help = "/home/nehleh/0_Research/Software/standard-RAxML-master/raxmlHPC -h"
 
 raxml = "/home/nehleh/0_Research/Software/standard-RAxML-master/raxmlHPC"
 
-param = " -m GTRGAMMA   -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/concatlong.fasta -N 20 -n RaxMLtree"
+param = " -m GTRGAMMA   -p 12345 -s /home/nehleh/0_Research/PhD/Data/LL_vector/Mauve/GTR_100_Aligned -N 20 -n RaxMLtree"
 
-param2 = " -m GTRGAMMA  --JC69  -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/concatlong.fasta -n likelihoos_JC "
+param2 = " -m GTRGAMMA  --JC69  -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/concatlong.fasta -n likelihood_JC "
 
 likelihood = " -f g -z /home/nehleh/0_Research/PhD/Data/simulationdata/tree/RAxML_bestTree.RaxMLtree"
 
-cmd = raxml + param2 + likelihood
+cmd = raxml + param
 print(cmd)
 os.system(cmd)

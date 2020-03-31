@@ -2,7 +2,7 @@ import dendropy
 from dendropy.simulate import treesim
 import os
 
-tips_number = 20
+tips_number = 10
 
 temp = []
 for i in range(tips_number):
@@ -22,7 +22,7 @@ f.close()
 
 
 model = 'GTR'
-seqnum = '100000'
+seqnum = '5000'
 frequencies = '0.2184,0.2606,0.3265,0.1946'
 rates = '2.0431,0.0821,0,0.067,0,1'
 # frequencies = '0.25,0.25,0.25,0.25'

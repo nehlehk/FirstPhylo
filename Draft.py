@@ -1,39 +1,51 @@
 # import libraries
-import numpy
-import ruptures as rpt
-import matplotlib.pyplot as plt
+from Bio import AlignIO
+from Bio.AlignIO import MauveIO
+import pprint
+
+
+align = AlignIO.parse("/home/nehleh/0_Research/PhD/Data/100k/GTR_100k", "mauve")
+
+alignments = list(align)
+
+
+for id in range(len(alignments)):
+    # print("MYID************************",id)
+    for idx,record in enumerate(alignments[id]):
+        if record.name == '1':
+            print(record)
+
+
+lcb=arr = [[0 for i in range(5)] for j in range(len(alignments))]
 
 
 
+for id in range(len(alignments)):
+    # print("MYID************************",id)
+    for idx,record in enumerate(alignments[id]):
+            lcb[id][0] = record.name
+            lcb[id][1] = record.annotations['start']
+            lcb[id][2] = record.annotations['end']
+            lcb[id][3] = record.seq
+            lcb[id][4] = record.annotations['strand']
 
 
-with open('/home/nehleh/0_Research/PhD/Data/simulationdata/likelihoos_JC', 'r') as f:
-    data = f.read().split(" ")
-    ll = []
-    for elem in data:
-        try:
-            ll.append(float(elem))
-        except ValueError:
-            pass
+pprint.pprint(lcb)
 
+name = []
+for i in range(len(lcb)):
+    name.append(lcb[i][0])
 
-signal = numpy.array(ll)
+# print(name)
+uniqename= list(set(name))
 
+# for i in uniqename:
+#     for id,item in enumerate(lcb):
+#         if item[0] == i:
+#             print(item)
 
+#
+# for record in alignments:
+#         print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+#         print(record)
 
-
-# change point detection
-model = "l1"   # "l1", "l2", "rbf", "linear", "normal", "ar"
-
-# my_bkps = rpt.Dynp(model=model, min_size=3).fit_predict(signal,n_bkps=3)
-
-# my_bkps = rpt.Window(model=model, width= 15).fit_predict(signal,n_bkps=5)
-
-my_bkps = rpt.Pelt(model = model, min_size=5, jump=100).fit_predict(signal,pen=3*numpy.log(signal.shape[0]))
-
-
-
-print(my_bkps)
-# show results
-rpt.show.display(signal, my_bkps , figsize =(15,7))
-plt.show()

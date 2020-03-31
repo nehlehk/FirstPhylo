@@ -32,18 +32,24 @@ model = "l1"   # "l1", "rbf", "linear", "normal", "ar"
 # my_bkps = rpt.Dynp(model=model, min_size=100).fit_predict(signal,n_bkps=5)
 
 
-search_method = 'Window-based change point detection'
-my_bkps = rpt.Window(model=model, width= 15).fit_predict(signal,pen=numpy.log(alignlen)*mean*std**2)
+# search_method = 'Window-based change point detection'
+# my_bkps = rpt.Window(model=model, width= 5000).fit_predict(signal,pen=numpy.log(alignlen)*mean*std**2)
+# my_bkps = rpt.Window(model=model, width= 5000).fit_predict(signal,epsilon=alignlen*mean*std**2)
+# my_bkps = rpt.Window(model=model, width= 10000).fit_predict(signal,epsilon=10)
 
 
-# search_method = 'Exact segmentation: Pelt'
-# my_bkps = rpt.Pelt(model = model, min_size=5, jump=100).fit_predict(signal,pen=3*numpy.log(signal.shape[0]))
+
+search_method = 'Exact segmentation: Pelt'
+my_bkps = rpt.Pelt(model = model, min_size=500).fit_predict(signal,pen=100)
 
 print(my_bkps)
 
 
 
 # show results
-rpt.show.display(signal, my_bkps , figsize =(15,7))
-plt.title(search_method)
+
+rpt.show.display(signal, my_bkps , figsize =(15,6))
+plt.title(search_method , y = 0.1)
 plt.show()
+
+
