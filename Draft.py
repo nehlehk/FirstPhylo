@@ -4,6 +4,7 @@ from Bio.AlignIO import MauveIO
 import pprint
 
 
+
 align = AlignIO.parse("/home/nehleh/0_Research/PhD/Data/100k/GTR_100k", "mauve")
 
 alignments = list(align)
@@ -49,3 +50,4 @@ uniqename= list(set(name))
 #         print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 #         print(record)
 
+model =OptimizedPelt(model=OptimizedNormalCost()).fit(X)
