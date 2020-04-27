@@ -3,6 +3,17 @@ import numpy as np
 
 
 # =====================================  fastsimbactree ====================================
+help = "/home/nehleh/0_Research/Software/fastsimbac/fastSimBac_linux/example_input"
+
+fastsimbac = "/home/nehleh/anaconda3/pkgs/fastsimbac-1.0.1_bd3ad13d8f79-h6dcb523_0/bin/fastSimBac "
+
+paramfast = "10 5000 -T -t .001 -r .00001 500 > /home/nehleh/PycharmProjects/FirstPhylo/fastsimbactree.txt"
+
+cmdfastsimbac = fastsimbac + paramfast
+print(cmdfastsimbac)
+os.system(cmdfastsimbac)
+
+# =====================================  prepare tree for seq-gen ====================================
 seq_len = []
 seq_tree = []
 f = open("/home/nehleh/PycharmProjects/FirstPhylo/fastsimbactree.txt", "r")
@@ -32,10 +43,10 @@ for i in np.arange(len(seq_len)):
     os.system(cmd)
 
 # # =====================================  combine fasta files ====================================
-#
-#
-#     castfasta = '/home/nehleh/0_Research/Software/catfasta2phyml-master/catfasta2phyml.pl '
-#     paramcast = ' -f  /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/5000/*.fasta > /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/5000/5000-recombin.fasta'
-#     cmdcast = castfasta + paramcast
-#     print(cmdcast)
-#     os.system(cmdcast)
+
+
+    castfasta = '/home/nehleh/0_Research/Software/catfasta2phyml-master/catfasta2phyml.pl '
+    paramcast = ' -f  -c /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/5000/*.fasta > /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/5000/5000-recombin.fasta'
+    cmdcast = castfasta + paramcast
+    print(cmdcast)
+    os.system(cmdcast)
