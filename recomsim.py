@@ -1,5 +1,4 @@
 import os
-import numpy as np
 
 seq_count = '10'
 seqnum = '5000'
