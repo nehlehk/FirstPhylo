@@ -8,15 +8,15 @@ help = "/home/nehleh/0_Research/Software/standard-RAxML-master/raxmlHPC -h"
 
 raxml = "/home/nehleh/0_Research/Software/standard-RAxML-master/raxmlHPC"
 
-param = " -m GTRGAMMA   -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/5000/5000-recombin.fasta -N 10 -n RaxMLtree"
+param = " -m GTRGAMMA   -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/recombined.fasta -N 10 -n RaxMLtree"
 
-param2 = " -m GTRGAMMA  --JC69  -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/5000/5000-recombin.fasta -n likelihood_JC "
+param2 = " -m GTRGAMMA  --JC69  -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/recombined.fasta -n likelihood_JC "
 
-paramlikelihood = " -m GTRGAMMA   -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/5000/5000-recombin.fasta -n likelihood_GTR"
+paramlikelihood = " -m GTRGAMMA   -p 12345 -s /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/recombined.fasta -n likelihood_GTR"
 
-likelihood = " -f g -z /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/5000/RAxML_bestTree.RaxMLtree"
+likelihood = " -f g -z /home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/RAxML_bestTree.RaxMLtree"
 
 cmd = raxml + paramlikelihood + likelihood
-# cmd = help
+# cmd = raxml + param
 print(cmd)
 os.system(cmd)

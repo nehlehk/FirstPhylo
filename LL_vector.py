@@ -100,18 +100,34 @@ def computelikelihood(tree,dna,model):
 
     # print(partial)
 
-    ll = numpy.sum(partial[tree.seed_node.index]) * 0.25
+    # ll_partial = []
+    ll_partial = numpy.zeros(tips-1)
+    p_index = 0
+    for par  in range(tips+1,tree.seed_node.index+2,1):
+        temp = 0
+        temp = numpy.sum(partial[par]) * 0.25
+        # ll_partial.append(round(numpy.log(temp),7))
+        ll_partial[p_index] = round(numpy.log(temp),7)
+        p_index += 1
+
+    # ll = numpy.sum(partial[12]) * 0.25
+
+    # ll = numpy.sum(partial[tree.seed_node.index]) * 0.25
 
     # print("likelihood = {} and log-likelihood = {} ".format(round(ll,7) , round(numpy.log(ll),7)))
-    return round(numpy.log(ll),7)
+    # return round(numpy.log(ll),7)
+    # return 1
+    return ll_partial
 #=======================================================================================================================
 def fillvector(tree,alignment,model):
-    LL_vector = []
+    # LL_vector = []
+    LL_vector = numpy.zeros((tips - 1 ,alignment_len ))
     for l in range(alignment_len):
         col = ""
         for t in range(tips):
             col += str(alignment[t][l])
-        LL_vector.append(computelikelihood(tree, col, model))
+        # LL_vector.append(computelikelihood(tree, col, model))
+        LL_vector[:,l] = computelikelihood(tree, col, model)
     return LL_vector
 #=======================================================================================================================
 
@@ -120,9 +136,9 @@ rates = [2.0431,0.0821,0,0.067,0]
 f = 1
 
 
-tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/LL_vector/tree.tree', 'newick')
-alignment_GTR = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/GTR_100.fasta"), schema="fasta")
-alignment_JC = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/JC69_100.fasta"), schema="fasta")
+tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/RAxML_bestTree.RaxMLtree', 'newick')
+alignment_GTR = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/recombined.fasta"), schema="fasta")
+# alignment_JC = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/JC69_100.fasta"), schema="fasta")
 
 
 tips = len(alignment_GTR)
@@ -130,19 +146,34 @@ alignment_len = alignment_GTR.sequence_size
 
 
 
-GTRGTRvector = []
-JCJCvector = []
-GTRJCvector = []
-JCGTRvector = []
+# GTRGTRvector = []
+# JCJCvector = []
+# GTRJCvector = []
+# JCGTRvector = []
 
-GTRGTRvector = fillvector(tree,alignment_GTR,'GTR')
-JCJCvector = fillvector(tree,alignment_JC,'JC69')
-GTRJCvector = fillvector(tree,alignment_GTR,'JC69')
-JCGTRvector = fillvector(tree,alignment_JC,'GTR')
+# GTRGTRvector = fillvector(tree,alignment_GTR,'GTR')
+# JCJCvector = fillvector(tree,alignment_JC,'JC69')
+# GTRJCvector = fillvector(tree,alignment_GTR,'JC69')
+# JCGTRvector = fillvector(tree,alignment_JC,'GTR')
+#
+#
+# f = open('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/100000/LL.csv', "a")
+# f.write('JC69-JC'+','+'JC-GTR'+','+'GTR-GTR'+','+'GTR-JC'+'\n')
+# for i in range(alignment_len):
+#     f.write(str(JCJCvector[i])+','+str(JCGTRvector[i])+','+str(GTRGTRvector[i])+','+str(GTRJCvector[i])+'\n')
+# f.close()
 
 
-f = open('/home/nehleh/0_Research/PhD/Data/LL_vector/LL.csv', "a")
-f.write('JC69-JC'+','+'JC-GTR'+','+'GTR-GTR'+','+'GTR-JC'+'\n')
-for i in range(alignment_len):
-    f.write(str(JCJCvector[i])+','+str(JCGTRvector[i])+','+str(GTRGTRvector[i])+','+str(GTRJCvector[i])+'\n')
-f.close()
+result = fillvector(tree,alignment_GTR,'GTR')
+
+
+# f = open('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/seq-gen-order/partial.txt', "a")
+for i in range(result.shape[0]):
+    f = open('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/partial'+str(tips+i+1)+'.txt', "a")
+    for j in range(alignment_len):
+    # print(str(result[i,:]))
+        f.write(str(result[i,j]) + ' ')
+    f.close()
+
+
+
