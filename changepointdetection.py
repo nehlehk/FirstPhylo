@@ -6,7 +6,7 @@ import ruptures as rpt
 
 
 # creation of data
-with open('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/100000/12.txt', 'r') as f:
+with open('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/faketree/RAxML_perSiteLLs.likelihood_GTR', 'r') as f:
     data = f.read().split(" ")
     ll = []
     for elem in data:
@@ -37,16 +37,16 @@ model = "l1"   # "l1", "rbf", "linear", "normal", "ar"
 # my_bkps = rpt.Window(model=model, width= 5).fit_predict(signal,pen=1000)
 
 
-search_method = 'Exact segmentation: Pelt'
-my_bkps = rpt.Pelt(model = model, min_size=5).fit_predict(signal,pen=10)
+# search_method = 'Exact segmentation: Pelt'
+# my_bkps = rpt.Pelt(model = model, min_size=5).fit_predict(signal,pen=10)
 
 
 # search_method = 'Bottom-up segmentation'
-# my_bkps = rpt.BottomUp(model = model).fit_predict(signal,pen=10)
+# my_bkps = rpt.BottomUp(model = model).fit_predict(signal,pen=5)
 
 
-# search_method = 'Binary segmentation'
-# my_bkps = rpt.Binseg(model = model).fit_predict(signal,pen=3)
+search_method = 'Binary segmentation'
+my_bkps = rpt.Binseg(model = model).fit_predict(signal,pen=30)
 
 
 

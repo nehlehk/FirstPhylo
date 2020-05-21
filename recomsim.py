@@ -15,7 +15,7 @@ os.system(cmdfastsimbac)
 
 # =====================================  prepare tree for seq-gen ====================================
 f = open("/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/fastsimbactree.txt", "r")
-treefile= "/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/tree.tree"
+treefile= "/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/fastsimbactree"
 partition = 0
 for line in f:
     if  line.find('[') == 0:
@@ -30,7 +30,7 @@ frequencies = '0.2184,0.2606,0.3265,0.1946'
 rates = '2.0431,0.0821,0,0.067,0,1'
 # frequencies = '0.25,0.25,0.25,0.25'
 # rates = '1,1,1,1,1,1'
-outfile = '/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/recombined.fasta'
+outfile = '/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/wholegenome.fasta'
 seqgen = '/home/nehleh/0_Research/Software/Seq-Gen-1.3.4/source/seq-gen'
 cmd = seqgen + '  -m'+model+ '  -l'+ seqnum + '  -f'+frequencies  + '  -p' + str(partition)  \
       +  '  -s0.2' + '  -r'+rates +'  -of'+ '  <'+treefile+'>  ' + outfile

@@ -136,8 +136,8 @@ rates = [2.0431,0.0821,0,0.067,0]
 f = 1
 
 
-tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/RAxML_bestTree.RaxMLtree', 'newick')
-alignment_GTR = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/recombined.fasta"), schema="fasta")
+tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/RAxML_bestTree.wholegenometree', 'newick')
+alignment_GTR = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/wholegenome.fasta"), schema="fasta")
 # alignment_JC = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/LL_vector/JC69_100.fasta"), schema="fasta")
 
 
