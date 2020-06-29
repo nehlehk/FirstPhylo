@@ -9,24 +9,26 @@ alignment_len = alignment.sequence_size
 tips = len(alignment)
 
 
-coulmns = []
+column = []
 for l in range(alignment_len):
     col = ""
     for t in range(tips):
         col += str(alignment[t][l])
-    coulmns.append(col)
+    column.append(col)
 
-myset = list(set(coulmns))
-# print((myset))
-print(len(myset))
-# print(myset[0:10])
-print("----------------------")
-a = 0
-for i in range(len(myset)):
-    print(coulmns.count(myset[i]))
-    a = a + coulmns.count(myset[i])
+uniqueCol = list(set(column))
+# print(len(uniqueCol))
+print(uniqueCol[0:10])
 
-print(a)
 
-# print(coulmns[0:10])
-# print(coulmns.count(coulmns[6]))
+
+
+clonal_vector = numpy.zeros((5, 1000000))
+for i in range(len(uniqueCol)):
+    print(column.count(uniqueCol[i]))
+    indexes = [id for id, x in enumerate(column) if x == uniqueCol[0] ]
+    clonal_vector[:,indexes] = 1
+    print(indexes)
+
+print("--****************************--")
+print(clonal_vector)

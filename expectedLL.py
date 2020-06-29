@@ -15,9 +15,10 @@ alignment = dendropy.DnaCharacterMatrix.get(file=open("/media/nehleh/295eaca0-f1
 tips = len(alignment)
 alignment_len = alignment.sequence_size
 
-internalnode = 99 #  -1 works for all internalnodes
-co_clonal = 0.9
-co_recombination = 1.1
+
+internalnode = 98 #  -1 works for all internalnodes
+co_clonal = 0.7
+co_recombination = 1.3
 
 
 def give_index(c):
@@ -130,6 +131,7 @@ def expectedLL(tree,dna,model,internal_node , co_clonal , co_recom):
             expected_recombination_ll[p_index] = round(numpy.log(numpy.mean(exp_recom[par])), 7)
             p_index += 1
         return expected_clonal_ll , expected_recombination_ll
+
     else:
         return round(numpy.log(numpy.mean(exp_clonal[internal_node])), 7) , round(numpy.log(numpy.mean(exp_recom[internal_node])), 7)
 
@@ -137,11 +139,23 @@ def expectedLL(tree,dna,model,internal_node , co_clonal , co_recom):
 def fillvector(tree,alignment,model , internl_node = -1 , co_clonal = 1 , co_recom = 1  ):
     recom_vector = numpy.zeros((tips - 1 ,alignment_len ))
     clonal_vector = numpy.zeros((tips - 1, alignment_len))
+    column = []
     for l in range(alignment_len):
         col = ""
         for t in range(tips):
             col += str(alignment[t][l])
-        clonal_vector[:, l] , recom_vector[:, l] = expectedLL(tree, col, model,internl_node , co_clonal , co_recom)
+        # clonal_vector[:, l] , recom_vector[:, l] = expectedLL(tree, col, model,internl_node , co_clonal , co_recom)
+        column.append(col)
+
+
+    uniqueCol = list(set(column))
+    print("uniques:",uniqueCol)
+    print("how many uniques we have ",len(uniqueCol))
+    for i in range(len(uniqueCol)):
+        indexes = [id for id, x in enumerate(column) if x == uniqueCol[i]]
+        # print(indexes)
+        clonal_vector[:, indexes], recom_vector[:, indexes] = expectedLL(tree, uniqueCol[i], model, internl_node, co_clonal, co_recom)
+
     return clonal_vector, recom_vector
 #=======================================================================================================================
 
