@@ -10,13 +10,14 @@ pi = [0.2184,0.2606,0.3265,0.1946]
 rates = [2.0431,0.0821,0,0.067,0]
 f = 1
 
-tree = Tree.get_from_path('/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/exampledatset/exampledataset_RAxML_bestTree', 'newick')
-alignment = dendropy.DnaCharacterMatrix.get(file=open("/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/exampledatset/single.fasta"), schema="fasta")
+tree = Tree.get_from_path('/media/nehleh/295eaca0-f110-4b79-8cbe-bc99f9f61cbd/nehleh/0_Research/PhD/Data/simulationdata/recombination/clonalframe/RAxML_bestTree.wholegenometree', 'newick')
+alignment = dendropy.DnaCharacterMatrix.get(file=open("/media/nehleh/295eaca0-f110-4b79-8cbe-bc99f9f61cbd/nehleh/0_Research/PhD/Data/simulationdata/recombination/clonalframe/wholegenome.fasta"), schema="fasta")
 tips = len(alignment)
 alignment_len = alignment.sequence_size
 
-internalnode = 12 #  -1 works for all internalnodes
-coefficient = 0.7
+internalnode = 99 #  -1 works for all internalnodes
+co_clonal = 0.9
+co_recombination = 1.1
 
 
 def give_index(c):
@@ -77,13 +78,13 @@ def p_matrix(br_length,model):
 
     return p
 # =======================================================================================================
-def expectedLL(tree,dna,model,internal_node , coefficient):
+def expectedLL(tree,dna,model,internal_node , co_clonal , co_recom):
     if internal_node == -1:
         internal_node = 2 * tips -1
 
     partial = numpy.zeros((2 * tips,4))
-    expll = numpy.zeros((2 * tips, 4))
-    recomll = numpy.zeros((2 * tips, 4))
+    exp_clonal = numpy.zeros((2 * tips, 4))
+    exp_recom = numpy.zeros((2 * tips, 4))
 
     for node in tree.postorder_node_iter():
         node.index = 0
@@ -107,63 +108,59 @@ def expectedLL(tree,dna,model,internal_node , coefficient):
             i = give_index(str(dna[pos]))
             pos += 1
             partial[node.index][i] = 1
-            expll[node.index][i] = 1
-            recomll[node.index][i] = 1
+            exp_clonal[node.index][i] = 1
+            exp_recom[node.index][i] = 1
         else:
             children = node.child_nodes()
             partial[node.index] = numpy.dot(p_matrix(children[0].edge_length,model), partial[children[0].index])
-            expll[node.index] = partial[node.index] * children[0].edge_length
-            recomll[node.index] = partial[node.index] * children[0].edge_length * coefficient
+            exp_clonal[node.index] = numpy.dot(p_matrix(children[0].edge_length * co_clonal, model), partial[children[0].index])
+            exp_recom[node.index] = numpy.dot(p_matrix(children[0].edge_length * co_recom , model), partial[children[0].index])
             for i in range(1, len(children)):
                 partial[node.index] *= numpy.dot(p_matrix(children[i].edge_length,model), partial[children[i].index])
-                expll[node.index] *= (partial[node.index] * children[i].edge_length)
-                recomll[node.index] *=  partial[node.index] * children[i].edge_length * coefficient
+                exp_clonal[node.index] *= numpy.dot(p_matrix(children[i].edge_length * co_clonal, model), exp_clonal[children[i].index])
+                exp_recom[node.index] *= numpy.dot(p_matrix(children[i].edge_length * co_recom, model), exp_recom[children[i].index])
 
 
     if internal_node == 2 * tips -1 :
-        expected_ll = numpy.zeros(tips - 1)
-        recombination_ll = numpy.zeros(tips - 1)
+        expected_clonal_ll = numpy.zeros(tips - 1)
+        expected_recombination_ll = numpy.zeros(tips - 1)
         p_index = 0
         for par  in range(tips+1,tree.seed_node.index+1,1):
-            temp0 = 0
-            temp0 = numpy.sum(expll[par]) * 0.25
-            expected_ll[p_index] = round(numpy.log(temp0), 7)
-            temp1 = 0
-            temp1 = numpy.sum(recomll[par]) * 0.25
-            recombination_ll[p_index] = round(numpy.log(temp1), 7)
+            expected_clonal_ll[p_index] = round(numpy.log(numpy.mean(exp_clonal[par])), 7)
+            expected_recombination_ll[p_index] = round(numpy.log(numpy.mean(exp_recom[par])), 7)
             p_index += 1
-        return expected_ll , recombination_ll
+        return expected_clonal_ll , expected_recombination_ll
     else:
-        return round(numpy.log(numpy.sum(expll[internal_node]) * 0.25), 7) , round(numpy.log(numpy.sum(recomll[internal_node]) * 0.25), 7)
+        return round(numpy.log(numpy.mean(exp_clonal[internal_node])), 7) , round(numpy.log(numpy.mean(exp_recom[internal_node])), 7)
 
 #=======================================================================================================================
-def fillvector(tree,alignment,model , internl_node = -1 , coefficient = 1):
+def fillvector(tree,alignment,model , internl_node = -1 , co_clonal = 1 , co_recom = 1  ):
     recom_vector = numpy.zeros((tips - 1 ,alignment_len ))
-    expected_vector = numpy.zeros((tips - 1, alignment_len))
+    clonal_vector = numpy.zeros((tips - 1, alignment_len))
     for l in range(alignment_len):
         col = ""
         for t in range(tips):
             col += str(alignment[t][l])
-        expected_vector[:, l] , recom_vector[:, l] = expectedLL(tree, col, model,internl_node , coefficient)
-    return expected_vector, recom_vector
+        clonal_vector[:, l] , recom_vector[:, l] = expectedLL(tree, col, model,internl_node , co_clonal , co_recom)
+    return clonal_vector, recom_vector
 #=======================================================================================================================
 
-expll , recomll = fillvector(tree,alignment,'GTR' ,internalnode , coefficient)
+expll , recomll = fillvector(tree,alignment,'GTR' ,internalnode , co_clonal , co_recombination)
 
 if internalnode != -1:
-    avg_exp = numpy.mean(expll)
-    std_exp = numpy.std(expll)
-    print(" expected likelihood node {}  is: {} and std is: {}".format(internalnode, avg_exp, std_exp))
+    avg_clonal = numpy.mean(expll)
+    std_clonal = numpy.std(expll)
+    print(" expected likelihood node {}  is: {} and std is: {}".format(internalnode, avg_clonal, std_clonal))
     avg_recom = numpy.mean(recomll)
     std_recom = numpy.std(recomll)
     print(" recombinant mean node {}  is: {} and std is: {}".format(internalnode, avg_recom, std_recom))
 else:
     for i in range(expll.shape[0]):
-        avg_exp = numpy.mean(expll[i])
-        std_exp = numpy.std(expll[i])
+        avg_clonal = numpy.mean(expll[i])
+        std_clonal = numpy.std(expll[i])
         avg_recom = numpy.mean(recomll[i])
         std_recom = numpy.std(recomll[i])
-        print(" expected likelihood node {}  is: {} and std is: {}".format(i+1+tips, avg_exp, std_exp))
-        print(" recombinant mean node {}  is: {} and std is: {}".format(i + 1 + tips, avg_recom, std_recom))
+        print(" Clonal expected likelihood node {}   mean is: {} and std is: {}".format(i+1+tips, avg_clonal, std_clonal))
+        print(" Recombinant expected likelihood node {}   mean is: {} and std is: {}".format(i + 1 + tips, avg_recom, std_recom))
 
 
