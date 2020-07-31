@@ -5,7 +5,7 @@ import pandas as pd
 
 
 
-df1 = pd.read_csv("/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/partial18.txt", sep='\s+', header=None)
+df1 = pd.read_csv("/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000-1/partial16.txt", sep='\s+', header=None)
 ll = df1.to_numpy()
 data = np.array(ll)
 X = data.reshape((-1,1))
@@ -17,29 +17,31 @@ std = np.std(X)
 # print(std)
 
 
-a = -7.312678532710002
-astd= 1.0286153264950095
-b= -8.026028432710003
-bstd= 1.028615334911007
-
-print(a)
-print(b)
-
+a = -3.882838414255599
+astd= .001
+b=   -3.8150631108804007
+bstd= .001
 
 
 
 model = hmm.GaussianHMM(n_components=2, covariance_type="full" ,algorithm='viterbi' )
-model.startprob_ = np.array([0.88, 0.12])
-# model.startprob_ = np.array([0.9, 0.1])
+# model.startprob_ = np.array([0.88, 0.12])
+model.startprob_ = np.array([0.98, 0.02])
 model.transmat_ = np.array([[0.9999, 0.0001] , [0.0001, 0.9999]])
 model.means_ = np.array([[a, astd], [b, bstd]])
 model.covars_ = np.tile(np.identity(2), (2, 1, 1))
 
 
 posterior = model.predict_proba(X)
+# print(posterior)
+print(posterior[54150:54200])
+print("------------------------------------------")
+print(posterior[56980:57050])
+print("------------------------------------------")
+print(posterior[71000:71100])
 
 hiddenStates = model.predict(X)
-print(hiddenStates)
+# print(hiddenStates)
 
 score = model.score(X)
 

@@ -4,7 +4,7 @@ import os
 # bootstrapp = " -m GTRCAT -p 12345 -b 12345  -V -# 100 -s /home/nehleh/0_Research/PhD/Data/LL_vector/JC69_100.fasta  -n T14"
 # bipartition = " -m GTRCAT -p 12345 -f b -t RAxML_bestTree.T13 -z RAxML_bootstrap.T14 -n T15"
 
-path = "/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000/"
+path = "/home/nehleh/0_Research/PhD/Data/simulationdata/BratNextGen"
 
 help = "/home/nehleh/0_Research/Software/standard-RAxML-master/raxmlHPC -h"
 
@@ -18,7 +18,7 @@ paramlikelihood = " -m GTRGAMMA   -p 12345 -s " + path+ "wholegenome.fasta -n li
 
 likelihood = " -f g -z " + path+ "RAxML_bestTree.wholegenometree"
 
-cmd = raxml + paramlikelihood + likelihood
-# cmd = raxml + param
+#cmd = raxml + paramlikelihood + likelihood
+cmd = raxml + param
 print(cmd)
 os.system(cmd)

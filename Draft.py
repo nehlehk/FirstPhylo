@@ -6,6 +6,9 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 
+
+
+
 # for i in range(30):
 #     n = np.random.randint(1,7)
 #     print(n)
