@@ -5,11 +5,11 @@ import pandas as pd
 
 
 
-df1 = pd.read_csv("/home/nehleh/0_Research/PhD/Data/simulationdata/recombination/500000-1/partial16.txt", sep='\s+', header=None)
+df1 = pd.read_csv("/media/nehleh/295eaca0-f110-4b79-8cbe-bc99f9f61cbd/nehleh/0_Research/PhD/Data/simulationdata/recombination/clonalframe/RAxML_perSiteLLs.likelihood_GTR", sep='\s+', header=None)
 ll = df1.to_numpy()
 data = np.array(ll)
 X = data.reshape((-1,1))
-X = X[1:500000]
+X = X[1:1000000]
 
 mean = np.mean(X)
 std = np.std(X)
@@ -17,9 +17,9 @@ std = np.std(X)
 # print(std)
 
 
-a = -3.882838414255599
+a = -2.242906769736397
 astd= .001
-b=   -3.8150631108804007
+b = -2.2394927233501036
 bstd= .001
 
 
